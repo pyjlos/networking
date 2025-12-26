@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  service-a:
+    build: .
+    container_name: service-a
+    environment:
+      - BACKEND_ID=service-a
+      - PORT=8080
+      - TLS_CERT=certs/service-a.crt
+      - TLS_KEY=certs/service-a.key
+    networks:
+      - envoy-net
+
+  service-a-envoy:
+    image: envoyproxy/envoy:v1.26.1
+    container_name: envoy-a
+    depends_on:
+      - service-a
+    volumes:
+      - ./service-a-envoy.yaml:/etc/envoy/envoy.yaml
+      - ./certs:/etc/envoy/certs:ro
+    ports:
+      - "8081:8080"  # Expose Envoy listener for local access
+    networks:
+      - envoy-net
+    command: >
+      /usr/local/bin/envoy -c /etc/envoy/envoy.yaml --log-level info
+
+  service-b:
+    build: .
+    container_name: service-b
+    environment:
+      - BACKEND_ID=service-b
+      - PORT=8080
+      - TLS_CERT=certs/service-b.crt
+      - TLS_KEY=certs/service-b.key
+    networks:
+      - envoy-net
+
+  service-b-envoy:
+    image: envoyproxy/envoy:v1.26.1
+    container_name: envoy-b
+    depends_on:
+      - service-b
+    volumes:
+      - ./service-b-envoy.yaml:/etc/envoy/envoy.yaml
+      - ./certs:/etc/envoy/certs:ro
+    ports:
+      - "8082:8080"
+    networks:
+      - envoy-net
+    command: >
+      /usr/local/bin/envoy -c /etc/envoy/envoy.yaml --log-level info
+
+networks:
+  envoy-net:
+    driver: bridge
