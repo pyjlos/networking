@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    uses: pyjlos/cicd/.github/workflows/build/go-build.yaml@v1.0.1
+    uses: pyjlos/cicd/.github/workflows/build-go.yaml@v1.0.2
     with:
       go-version: "1.25"
       working-directory: "./httpserver/"
